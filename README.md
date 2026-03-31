@@ -25,7 +25,7 @@ HTML, CSS, JavaScript
 
 ⚙️ Installation
 Clone the repository:
-git clone https://github.com/your-username/Phishing-Detection-System(DETECTIFY).git
+git clone https://github.com/shwetasaini24/Phishing-Detection-System(DETECTIFY).git
 Install dependencies:
 pip install -r requirements.txt
 Run the project:
