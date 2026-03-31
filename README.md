@@ -1,4 +1,4 @@
-ho
+
 Detectify - Phishing Detection System
 Detectify is a cybersecurity web application that detects phishing URLs using a Machine Learning model. It also provides password generation and strength checking tools.
 
