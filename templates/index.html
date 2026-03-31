@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detectify - Phishing Detector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .result-phishing { 
+            background: linear-gradient(135deg, #fee2e2, #fecaca); 
+            border: 3px solid #ef4444; 
+            color: #dc2626; 
+        }
+        .result-safe { 
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0); 
+            border: 3px solid #10b981; 
+            color: #065f46; 
+        }
+        .strength-very-weak { background: #ef4444; width: 25%; }
+        .strength-weak { background: #f59e0b; width: 50%; }
+        .strength-medium { background: #3b82f6; width: 75%; }
+        .strength-strong { background: #10b981; width: 100%; }
+        .toast { 
+            position: fixed; top: 20px; right: 20px; 
+            background: #10b981; color: white; 
+            padding: 12px 24px; border-radius: 8px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            z-index: 10000; transform: translateX(400px); 
+            transition: all 0.3s ease; 
+        }
+        .toast.show { transform: translateX(0); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-purple-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <a href="#" class="flex items-center gap-3 text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    <i class="fas fa-shield-virus text-4xl"></i>
+                    <span>Detectify</span>
+                </a>
+                <nav class="hidden md:flex gap-8 text-lg">
+                    <a href="#scanner" class="text-gray-700 hover:text-indigo-600 font-semibold px-3 py-1 rounded-lg hover:bg-indigo-50 transition-all">Scanner</a>
+                    <a href="#tools" class="text-gray-700 hover:text-purple-600 font-semibold px-3 py-1 rounded-lg hover:bg-purple-50 transition-all">Tools</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        <!-- AI Scanner Section -->
+        <section id="scanner" class="text-center mb-24">
+            <div class="mb-12">
+                <div class="inline-flex items-center gap-3 bg-indigo-100 px-6 py-3 rounded-full mb-8 mx-auto max-w-max">
+                    <i class="fas fa-brain text-indigo-600 text-2xl"></i>
+                    <span class="text-xl font-bold text-indigo-800">DETECTIFY</span>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 leading-tight">
+                    Phishing Detector
+                </h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                    Enter any URL and you will instantly detect if it's safe or phishing
+                </p>
+            </div>
+
+            <!-- Form -->
+            <div class="max-w-2xl mx-auto">
+                <form method="POST" class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-white/50">
+                    <div class="relative mb-8">
+                        <input 
+                            name="url" 
+                            id="url" 
+                            type="text" 
+                            placeholder="https://example.com or www.example.com or example.com" 
+                            class="w-full p-6 pl-12 text-2xl border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200/50 bg-white/80 font-medium transition-all duration-300 shadow-lg"
+                            required
+                        >
+                        <i class="fas fa-globe absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-indigo-500"></i>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-8 rounded-2xl text-2xl font-black shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300">
+                        <i class="fas fa-search mr-3"></i>SCAN NOW
+                    </button>
+                </form>
+
+                <!-- Result -->
+                {% if predict %}
+                <div class="mt-12 p-10 rounded-3xl shadow-2xl backdrop-blur-xl border-4 transition-all duration-700 animate-pulse {% if 'PHISHING' in predict %}result-phishing{% else %}result-safe{% endif %}">
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        {% if 'PHISHING' in predict %}
+                            <div class="text-6xl">
+                                <i class="fas fa-exclamation-triangle text-red-500 animate-bounce"></i>
+                            </div>
+                        {% else %}
+                            <div class="text-6xl">
+                                <i class="fas fa-check-circle text-green-500 animate-pulse"></i>
+                            </div>
+                        {% endif %}
+                        <div class="text-center md:text-left">
+                            <h2 class="text-3xl md:text-4xl font-black mb-4">{{ predict }}</h2>
+                            <div class="flex flex-wrap gap-2 text-sm bg-white/50 px-4 py-2 rounded-xl">
+                                <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full font-medium">AI Analysis Complete</span>
+                                <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-medium">Real-time</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Tools Section -->
+        <section id="tools" class="mb-24">
+            <div class="text-center mb-20">
+                <h2 class="text-5xl md:text-6xl font-black text-gray-800 mb-6">🔧 Security Tools</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Password Generator & Strength Checker</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Password Generator -->
+                <div class="bg-white/70 backdrop-blur-xl rounded-3xl p-10 shadow-2xl border border-white/50 hover:shadow-3xl transition-all duration-300 hover:-translate-y-2">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-8 flex items-center justify-center gap-4">
+                        <i class="fas fa-key text-green-500 text-3xl"></i>
+                        Password Generator
+                    </h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">Password Length</label>
+                            <div class="flex items-center gap-4">
+                                <input type="range" id="passLength" min="8" max="50" value="16" class="flex-1 h-3 bg-gray-200 rounded-lg cursor-pointer accent-indigo-500 hover:accent-indigo-600">
+                                <span id="passLengthVal" class="text-2xl font-bold text-indigo-600 min-w-[2rem] text-center">16</span>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-2xl">
+                            <label class="flex items-center gap-3 p-3 rounded-xl hover:bg-white cursor-pointer transition-all">
+                                <input type="checkbox" id="uppercase" checked class="w-5 h-5 text-indigo-600 rounded">
+                                <span class="font-medium">ABC</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 rounded-xl hover:bg-white cursor-pointer transition-all">
+                                <input type="checkbox" id="numbers" checked class="w-5 h-5 text-indigo-600 rounded">
+                                <span class="font-medium">123</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 rounded-xl hover:bg-white cursor-pointer transition-all">
+                                <input type="checkbox" id="symbols" checked class="w-5 h-5 text-indigo-600 rounded">
+                                <span class="font-medium">!@#</span>
+                            </label>
+                        </div>
+
+                        <button onclick="generatePassword()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-5 px-8 rounded-2xl font-bold text-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+                            <i class="fas fa-magic mr-2"></i>Generate Password
+                        </button>
+
+                        <div class="relative">
+                            <input type="text" id="passwordOutput" readonly 
+                                   class="w-full p-6 text-2xl font-mono bg-gradient-to-r from-gray-100 to-gray-200 border-2 border-dashed border-gray-400 rounded-2xl text-center cursor-pointer hover:border-indigo-400 focus:border-indigo-500 focus:outline-none transition-all duration-300 font-bold tracking-wider select-all"
+                                   onclick="copyToClipboard()" placeholder="Click Generate to create password">
+                            <div id="passwordStrengthBars" class="flex gap-1 mt-4 justify-center"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password Strength Checker -->
+                <div class="bg-white/70 backdrop-blur-xl rounded-3xl p-10 shadow-2xl border border-white/50 hover:shadow-3xl transition-all duration-300 hover:-translate-y-2">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-8 flex items-center justify-center gap-4">
+                        <i class="fas fa-lock text-purple-500 text-3xl"></i>
+                        Strength Checker
+                    </h3>
+                    <div class="space-y-6">
+                        <div>
+                            <input 
+                                type="password" 
+                                id="passwordInput" 
+                                placeholder="Test your password strength here..." 
+                                class="w-full p-6 text-xl border-2 border-gray-300 rounded-2xl focus:border-purple-500 focus:ring-4 focus:ring-purple-200/50 bg-white/80 font-mono transition-all duration-300 shadow-lg"
+                                oninput="checkStrength()"
+                            >
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="strength-meter">
+                                <div class="w-full bg-gray-200 rounded-full h-4 shadow-inner">
+                                    <div id="strengthBar" class="h-4 rounded-full transition-all duration-500"></div>
+                                </div>
+                            </div>
+                            <div id="strengthLabel" class="text-center font-bold text-2xl"></div>
+                            <div id="strengthTips" class="text-sm text-gray-600 space-y-2 p-4 bg-gray-50 rounded-xl"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/80 backdrop-blur-md border-t border-gray-200 mt-24 py-12">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-4 mb-6">
+                <i class="fab fa-python text-3xl text-blue-600"></i>
+                <i class="fas fa-brain text-3xl text-indigo-600"></i>
+                <i class="fas fa-shield-alt text-3xl text-green-600"></i>
+            </div>
+            <p class="text-xl font-semibold text-gray-700 mb-2">© 2026 Detectify</p>
+            <p class="text-gray-500">Stay safe online</p>
+        </div>
+    </footer>
+
+    <script>
+        // Password Generator
+        function generatePassword() {
+            const length = document.getElementById('passLength').value;
+            let charset = 'abcdefghijklmnopqrstuvwxyz';
+            if (document.getElementById('uppercase').checked) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (document.getElementById('numbers').checked) charset += '0123456789';
+            if (document.getElementById('symbols').checked) charset += '!@#$%^&*()_+{}[]|\\:;"<>?,./';
+            
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                password += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            document.getElementById('passwordOutput').value = password;
+            updateStrengthBars(password);
+            showToast('Password generated successfully! 🔐');
+        }
+
+        // Strength Checker
+        function checkStrength() {
+            const password = document.getElementById('passwordInput').value;
+            if (password) {
+                updateStrengthBars(password);
+            }
+        }
+
+        function updateStrengthBars(password) {
+            let score = 0;
+            const tips = [];
+            
+            if (password.length >= 6) score += 25; else tips.push('Use 6+ characters');
+            if (/[A-Z]/.test(password)) score += 20; else tips.push('Add uppercase letters');
+            if (/[a-z]/.test(password)) score += 20; else tips.push('Add lowercase letters');
+            if (/[0-9]/.test(password)) score += 20; else tips.push('Add numbers');
+            if (/[^A-Za-z0-9]/.test(password)) score += 15; else tips.push('Add symbols');
+
+            const bar = document.getElementById('strengthBar');
+            const label = document.getElementById('strengthLabel');
+            const tipsDiv = document.getElementById('strengthTips');
+            
+            let strength = 'Very Weak', color = 'strength-very-weak';
+            if (score >= 80) { strength = 'Strong 💪'; color = 'strength-strong'; }
+            else if (score >= 60) { strength = 'Medium ⚠️'; color = 'strength-medium'; }
+            else if (score >= 40) { strength = 'Weak 😕'; color = 'strength-weak'; }
+            
+            bar.className = `h-4 rounded-full transition-all duration-500 ${color}`;
+            label.textContent = strength;
+            label.className = 'text-center font-bold text-2xl';
+            
+            tipsDiv.innerHTML = tips.length ? tips.map(tip => `<div>• ${tip}</div>`).join('') : '<div class="text-green-600 font-bold">Perfect password! 🛡️</div>';
+        }
+
+        // Copy to Clipboard
+        function copyToClipboard() {
+            const passwordField = document.getElementById('passwordOutput');
+            if (passwordField.value) {
+                navigator.clipboard.writeText(passwordField.value).then(() => {
+                    showToast('Copied to clipboard! 📋');
+                });
+            }
+        }
+
+        // Toast Notification
+        function showToast(message) {
+            let toast = document.querySelector('.toast');
+            if (toast) toast.remove();
+            
+            toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('passLength').addEventListener('input', function() {
+                document.getElementById('passLengthVal').textContent = this.value;
+            });
+        });
+    </script>
+</body>
+</html>
